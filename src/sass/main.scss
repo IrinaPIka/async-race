@@ -24,10 +24,10 @@ button:hover { color: #c4b107;}
     display: flex;
     cursor: pointer;
     font-size: 24px;
-    .title{
+    div {
         margin: 10px 20px;
     }
-    .title:hover{ color: #009688;}
+    div:hover{ color: #009688;}
 }
 
 .command {
@@ -71,6 +71,22 @@ button:hover { color: #c4b107;}
         border: 0px; 
         image {width:100%}
     }
-
-    
 }
+.win_wrap {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 20%;
+    width: 50%;
+    background-color: black;
+    opacity: 0.7;
+    text-align:center;
+    .win_text {
+        font-size: 40px;
+        font-weight: bold;
+        border: 1px dotted yellow;
+        box-shadow: 0px 1px 15px 14px green;
+        padding: 20px;
+    }
+    }
+

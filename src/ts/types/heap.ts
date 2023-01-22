@@ -9,9 +9,10 @@ export interface ICarGo {
 }
 
 interface Templ {
-    header: string;
-    table: string;
-    tr: string;
+    headerRace: string;
+    tableRace: string;
+    winRace: string;
+    headerWin: string;
 }
 
 export const nCarsInPage = 7;
@@ -19,10 +20,10 @@ export const nWinInPage = 10;
 export const vendors = ['Audi', 'Tesla', 'Mersedes', 'Chery', 'Volga', 'Toyota', 'BMW', 'Ford'];
 export const models = ['Fasty', 'Beauty', 'Nice', 'Black', 'Speedy', 'Mini', 'Camry', 'Wing', 'Sun'];
 export const templ: Templ = {
-    header: `
+    headerRace: `
         <div class="title-wrap">
-            <div class="title">Garage</div> 
-            <div class="title">Winners</div>
+            <div class="title_gar">Garage</div> 
+            <div class="title_win">Winners</div>
         </div>
         <div class="command">
             <input type="text" id="item_create">
@@ -43,28 +44,25 @@ export const templ: Templ = {
         <h2>Garage (<span id="num_cars">0</span>)</h2>
         <h3><span id="prev_page" class="page_arrow">&larr;</span> Page №<span id="n_page">1</span> <span id="next_page"  class="page_arrow">&rarr;</span></h3>
         `,
-    table: `
+    tableRace: `
     <table class="race_table"><tbody  id="race_table"></tbody></table>`,
-    tr: `
-    <tr>
-        <th class="left_td">
-            <div class="command" id="com##">
-
-            </div>
-        </th>
-        <td class="center_td"><div class="car_name" id="car_name##"></div></td>  
-        <td class="right_td"></td>  
-    </tr>
-    <tr class="dotted">
-        <td>
-            <div class="command">
-                <button id="forward##">Start</button>
-                <button id="back##">&#9668;</button>
-            </div>
-        </td>
-        <td>
-            <div class="car_img" id="car_img##"><img src="./images/car.png"></div>
-        </td>
-        <td> <img src="./images/flag.png"> </td>
-</tr>`,
+    winRace: `
+    <div class="win_wrap" id="win_wrap">
+        <div class="win_text">
+            First came 
+                <span class="win_name" id="win_name"></span> <br/>
+            with time 
+                <span class="win_time" id="win_time"></span>  
+        </div>
+    </div>
+`,
+    headerWin: `
+    <div class="title-wrap">
+        <div class="title_gar">Garage</div> 
+        <div class="title_win">Winners</div>
+    </div>
+    <h2>Winners (<span id="num_win">0</span>)</h2>
+    <h3><span id="prev_page_w" class="page_arrow">&larr;</span> Page №<span id="n_page">1</span> <span id="next_page_w"  class="page_arrow">&rarr;</span></h3>
+  
+    `,
 };

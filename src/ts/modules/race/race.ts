@@ -5,7 +5,8 @@ class Race {
     base: Base;
     nCars: number;
     nPage: number;
-    bodyWrap: HTMLElement;
+    raceWrap: HTMLElement;
+    page_garage: HTMLElement | null;
     elemNumCars: HTMLElement | null;
     elemCurPage: HTMLElement | null;
     elemNextPage: HTMLElement | null;
@@ -15,16 +16,24 @@ class Race {
     elemUpdateCar: HTMLElement | null;
     elemTableRace: HTMLElement | null;
     elemRemove: Array<HTMLElement | null>;
+    elemRace: HTMLInputElement | null;
+    elemReset: HTMLInputElement | null;
     carsInPage: Array<ICar>;
+    handle: Array<NodeJS.Timer>;
+    curWin: number;
+    timeStart: number;
 
     constructor(base: Base) {
         this.base = base;
 
-        this.bodyWrap = document.createElement('div');
-        document.body.appendChild(this.bodyWrap);
+        this.raceWrap = document.createElement('div');
+        this.raceWrap.id = 'race_wrap';
+
+        document.body.appendChild(this.raceWrap);
 
         this.nPage = 1;
         this.nCars = 0;
+        this.page_garage = null;
         this.elemAddCar = null;
         this.elemAdd100Car = null;
         this.elemNumCars = null;
@@ -33,17 +42,25 @@ class Race {
         this.elemPrevPage = null;
         this.elemTableRace = null;
         this.elemUpdateCar = null;
+        this.elemRace = null;
+        this.elemReset = null;
         this.carsInPage = [];
         this.elemRemove = [];
+        this.handle = [];
+        this.curWin = -1;
+        this.timeStart = 0;
     }
 
     show() {
         const race = this;
-        this.bodyWrap.innerHTML = templ['header'] + templ['table'];
+        this.raceWrap.innerHTML = templ['headerRace'] + templ['tableRace'] + templ['winRace'];
+
         this.elemNumCars = document.getElementById('num_cars');
         this.elemCurPage = document.getElementById('n_page');
         this.elemUpdateCar = document.getElementById('update');
         this.elemAddCar = document.getElementById('create');
+        this.elemRace = <HTMLInputElement>document.getElementById('race');
+        this.elemReset = <HTMLInputElement>document.getElementById('reset');
         if (this.elemAddCar !== null)
             this.elemAddCar.addEventListener('click', function () {
                 const text = <HTMLInputElement>document.getElementById('item_create');
@@ -58,7 +75,6 @@ class Race {
                 const idTmp = <HTMLInputElement>document.getElementById('id_update');
 
                 if (textTmp && colorTmp && idTmp) {
-                    console.log('updae', textTmp.value, colorTmp.value, idTmp.value);
                     race.base.updateCar({ name: textTmp.value, color: colorTmp.value, id: Number(idTmp.value) });
                     race.getNumCar();
                 }
@@ -75,8 +91,40 @@ class Race {
         this.elemPrevPage?.addEventListener('click', function () {
             race.changePage(false);
         });
+
         this.elemTableRace = document.getElementById('race_table');
         this.getNumCar();
+
+        // ************   race   ************
+        if (this.elemRace !== null)
+            this.elemRace.addEventListener('click', function () {
+                race.curWin = -1;
+                race.timeStart = Date.now();
+                const cars = document.getElementsByClassName('car_img');
+                for (let i = 0; i < cars.length; i += 1) {
+                    const tmp = cars[i].id.replace('car_img', '');
+                    race.driveCar(tmp);
+                }
+                this.disabled = true;
+            });
+        // ************   reset   ************
+        if (this.elemReset !== null)
+            this.elemReset.addEventListener('click', function () {
+                const cars = document.getElementsByClassName('car_img');
+                console.log('reset-atrt', race.handle);
+                for (let i = 0; i < cars.length; i += 1) {
+                    const nN = Number(cars[i].id.replace('car_img', ''));
+                    console.log('reset', nN, race.handle[nN]);
+                    if (race.handle[nN]) clearInterval(race.handle[nN]);
+                    const tmp = <HTMLElement>cars[i];
+                    tmp.style.marginLeft = '0px';
+                    const tmpBack = <HTMLButtonElement>document.getElementById('back' + nN);
+                    if (tmpBack) tmpBack.disabled = true;
+                    const tmpStart = <HTMLButtonElement>document.getElementById('forward' + nN);
+                    if (tmpStart) tmpStart.disabled = false;
+                }
+                if (race.elemRace) race.elemRace.disabled = false;
+            });
     }
 
     async getNumCar() {
@@ -100,6 +148,7 @@ class Race {
     drawStr(car: ICar) {
         const race = this;
         const n = String(car.id);
+        const nN = Number(n);
         const tr1 = document.createElement('tr');
         const th1Left = document.createElement('th');
         th1Left.className = 'left_td';
@@ -135,6 +184,7 @@ class Race {
         td1Center.className = 'center_td';
         const div2 = document.createElement('div');
         div2.className = 'car_name';
+        div2.id = 'car_name' + n;
         div2.innerHTML = car.name;
         td1Center.appendChild(div2);
 
@@ -152,33 +202,7 @@ class Race {
         butStart.innerHTML = 'Start';
         butStart.id = 'forward' + n;
         butStart.addEventListener('click', () => {
-            const car = <HTMLElement>document.getElementById('car_img' + n);
-            butStart.disabled = true;
-            if (car) {
-                const distance = car.parentElement ? car.parentElement.clientWidth - car.clientWidth - 20 : 0;
-                let curOffset = 0;
-                this.base.startCar(n).then((value: ICarGo) => {
-                    const speed = value.velocity;
-                    const back = <HTMLInputElement>document.getElementById('back' + n);
-                    const handle = setInterval(function () {
-                        if (curOffset < distance) {
-                            curOffset += speed / 10;
-                            car.style.marginLeft = curOffset + 'px';
-                        } else {
-                            clearInterval(handle);
-                            race.base.stopCar(n);
-                            if (back) back.disabled = false;
-                        }
-                    }, 16);
-                    this.base.driveModeCar(n).then((value: boolean) => {
-                        if (!value) {
-                            clearInterval(handle);
-                            this.base.stopCar(n);
-                            if (back) back.disabled = false;
-                        }
-                    });
-                });
-            }
+            race.driveCar(n);
         });
         div3Command.appendChild(butStart);
 
@@ -188,6 +212,7 @@ class Race {
         butBack.disabled = true;
         butBack.addEventListener('click', () => {
             const car = <HTMLElement>document.getElementById('car_img' + n);
+            if (race.handle[nN]) clearInterval(race.handle[nN]);
             if (car) car.style.marginLeft = '0px';
             butBack.disabled = true;
             butStart.disabled = false;
@@ -209,6 +234,58 @@ class Race {
         tr2.appendChild(td2center);
         tr2.appendChild(td2right);
         return [tr1, tr2];
+    }
+
+    async driveCar(n: string) {
+        const nN = Number(n);
+        const car = <HTMLElement>document.getElementById('car_img' + n);
+        const butStart = <HTMLButtonElement>document.getElementById('forward' + n);
+        const race = this;
+        const butBack = <HTMLButtonElement>document.getElementById('back' + n);
+        butStart.disabled = true;
+        butBack.disabled = false;
+
+        if (car) {
+            const distance = car.parentElement ? car.parentElement.clientWidth - car.clientWidth - 20 : 0;
+            let curOffset = 0;
+            this.base.startCar(n).then((value: ICarGo) => {
+                const speed = value.velocity;
+                race.handle[nN] = setInterval(function () {
+                    if (curOffset < distance) {
+                        curOffset += speed / 10;
+                        car.style.marginLeft = curOffset + 'px';
+                    } else {
+                        clearInterval(race.handle[nN]);
+                        race.base.stopCar(n);
+                        if (race.curWin === -1) {
+                            race.curWin = nN;
+                            race.showWin(nN);
+                        }
+                    }
+                }, 16);
+                this.base.driveModeCar(n).then((value: boolean) => {
+                    if (!value) {
+                        clearInterval(race.handle[nN]);
+                        this.base.stopCar(n);
+                    }
+                });
+            });
+        }
+    }
+
+    async showWin(nN: number) {
+        const divWin = document.getElementById('win_wrap');
+        if (divWin) divWin.style.display = 'block';
+        const car_name = document.getElementById('car_name' + nN);
+        const win_name = document.getElementById('win_name');
+        if (car_name && win_name) win_name.innerHTML = car_name.innerHTML;
+        const time = Date.now() - this.timeStart;
+        const win_time = document.getElementById('win_time');
+        if (win_time) win_time.innerHTML = String(time / 1000);
+        setTimeout(() => {
+            console.log('timer', divWin);
+            if (divWin) divWin.style.display = 'none';
+        }, 3000);
     }
 
     async changePage(to: boolean) {
