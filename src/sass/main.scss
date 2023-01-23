@@ -89,4 +89,21 @@ button:hover { color: #c4b107;}
         padding: 20px;
     }
     }
-
+.win_wrap_page { display:none}
+.win_table {
+    width:100%;
+    border-collapse: collapse;
+    td {
+        text-align: center;
+        padding: 10px;
+        border: 1px solid rgb(34, 34, 34);
+     }
+    .car-table-win {
+        height: 25px;
+        width: 60px;
+        margin-left: 40%;
+        img {
+            max-width:100%;
+        }
+    }
+}

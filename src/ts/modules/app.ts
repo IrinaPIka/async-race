@@ -7,10 +7,10 @@ class App {
     winPage: Win;
     constructor() {
         this.base = new Base();
-        this.racePage = new Race(this.base);
-        this.racePage.show();
         this.winPage = new Win(this.base);
         this.winPage.show();
+        this.racePage = new Race(this.base, this.winPage);
+        this.racePage.show();
     }
 }
 

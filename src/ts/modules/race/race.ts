@@ -1,60 +1,41 @@
 import Base from './../base/base';
+import Win from './../win/win';
 import { templ, vendors, models, nCarsInPage, ICar, ICarGo } from '../../types/heap';
 
 class Race {
     base: Base;
-    nCars: number;
-    nPage: number;
+    win: Win;
+    nCars = 0;
+    nPage = 1;
     raceWrap: HTMLElement;
-    page_garage: HTMLElement | null;
-    elemNumCars: HTMLElement | null;
-    elemCurPage: HTMLElement | null;
-    elemNextPage: HTMLElement | null;
-    elemPrevPage: HTMLElement | null;
-    elemAddCar: HTMLElement | null;
-    elemAdd100Car: HTMLElement | null;
-    elemUpdateCar: HTMLElement | null;
-    elemTableRace: HTMLElement | null;
-    elemRemove: Array<HTMLElement | null>;
-    elemRace: HTMLInputElement | null;
-    elemReset: HTMLInputElement | null;
-    carsInPage: Array<ICar>;
-    handle: Array<NodeJS.Timer>;
-    curWin: number;
-    timeStart: number;
+    page_garage: HTMLElement | null = null;
+    elemNumCars: HTMLElement | null = null;
+    elemCurPage: HTMLElement | null = null;
+    elemNextPage: HTMLElement | null = null;
+    elemPrevPage: HTMLElement | null = null;
+    elemAddCar: HTMLElement | null = null;
+    elemAdd100Car: HTMLElement | null = null;
+    elemUpdateCar: HTMLElement | null = null;
+    elemTableRace: HTMLElement | null = null;
+    elemRemove: Array<HTMLElement | null> = [];
+    elemRace: HTMLInputElement | null = null;
+    elemReset: HTMLInputElement | null = null;
+    carsInPage: Array<ICar> = [];
+    handle: Array<NodeJS.Timer> = [];
+    curWin = 0;
+    timeStart = 0;
 
-    constructor(base: Base) {
+    constructor(base: Base, win: Win) {
         this.base = base;
-
+        this.win = win;
         this.raceWrap = document.createElement('div');
         this.raceWrap.id = 'race_wrap';
-
+        this.raceWrap.innerHTML = templ['headerRace'] + templ['tableRace'] + templ['winRace'];
         document.body.appendChild(this.raceWrap);
-
-        this.nPage = 1;
-        this.nCars = 0;
-        this.page_garage = null;
-        this.elemAddCar = null;
-        this.elemAdd100Car = null;
-        this.elemNumCars = null;
-        this.elemCurPage = null;
-        this.elemNextPage = null;
-        this.elemPrevPage = null;
-        this.elemTableRace = null;
-        this.elemUpdateCar = null;
-        this.elemRace = null;
-        this.elemReset = null;
-        this.carsInPage = [];
-        this.elemRemove = [];
-        this.handle = [];
-        this.curWin = -1;
-        this.timeStart = 0;
     }
 
     show() {
         const race = this;
-        this.raceWrap.innerHTML = templ['headerRace'] + templ['tableRace'] + templ['winRace'];
-
         this.elemNumCars = document.getElementById('num_cars');
         this.elemCurPage = document.getElementById('n_page');
         this.elemUpdateCar = document.getElementById('update');
@@ -111,7 +92,6 @@ class Race {
         if (this.elemReset !== null)
             this.elemReset.addEventListener('click', function () {
                 const cars = document.getElementsByClassName('car_img');
-                console.log('reset-atrt', race.handle);
                 for (let i = 0; i < cars.length; i += 1) {
                     const nN = Number(cars[i].id.replace('car_img', ''));
                     console.log('reset', nN, race.handle[nN]);
@@ -125,6 +105,13 @@ class Race {
                 }
                 if (race.elemRace) race.elemRace.disabled = false;
             });
+        const tmpWin = document.getElementById('title_win1');
+        tmpWin?.addEventListener('click', () => {
+            const tmpRW = document.getElementById('race_wrap');
+            if (tmpRW) tmpRW.style.display = 'none';
+            const tmpWW = document.getElementById('win_wrap_page');
+            if (tmpWW) tmpWW.style.display = 'block';
+        });
     }
 
     async getNumCar() {
@@ -259,7 +246,10 @@ class Race {
                         race.base.stopCar(n);
                         if (race.curWin === -1) {
                             race.curWin = nN;
-                            race.showWin(nN);
+                            const time = Date.now() - race.timeStart;
+                            race.showWin(nN, time);
+                            console.log('race', nN, time);
+                            race.win.newWin(nN, time);
                         }
                     }
                 }, 16);
@@ -273,17 +263,15 @@ class Race {
         }
     }
 
-    async showWin(nN: number) {
+    async showWin(nN: number, time: number) {
         const divWin = document.getElementById('win_wrap');
         if (divWin) divWin.style.display = 'block';
         const car_name = document.getElementById('car_name' + nN);
         const win_name = document.getElementById('win_name');
         if (car_name && win_name) win_name.innerHTML = car_name.innerHTML;
-        const time = Date.now() - this.timeStart;
         const win_time = document.getElementById('win_time');
         if (win_time) win_time.innerHTML = String(time / 1000);
         setTimeout(() => {
-            console.log('timer', divWin);
             if (divWin) divWin.style.display = 'none';
         }, 3000);
     }

@@ -7,12 +7,19 @@ export interface ICarGo {
     velocity: number;
     distance: number;
 }
+export interface IWin {
+    id: number;
+    wins: number;
+    time: number;
+}
 
 interface Templ {
     headerRace: string;
     tableRace: string;
     winRace: string;
     headerWin: string;
+    tableWin: string;
+    tableWinTitle: string;
 }
 
 export const nCarsInPage = 7;
@@ -23,7 +30,7 @@ export const templ: Templ = {
     headerRace: `
         <div class="title-wrap">
             <div class="title_gar">Garage</div> 
-            <div class="title_win">Winners</div>
+            <div class="title_win" id="title_win1">Winners</div>
         </div>
         <div class="command">
             <input type="text" id="item_create">
@@ -58,11 +65,18 @@ export const templ: Templ = {
 `,
     headerWin: `
     <div class="title-wrap">
-        <div class="title_gar">Garage</div> 
+        <div class="title_gar" id="title_gar1">Garage</div> 
         <div class="title_win">Winners</div>
     </div>
     <h2>Winners (<span id="num_win">0</span>)</h2>
-    <h3><span id="prev_page_w" class="page_arrow">&larr;</span> Page №<span id="n_page">1</span> <span id="next_page_w"  class="page_arrow">&rarr;</span></h3>
+    <h3><span id="prev_page_w" class="page_arrow">&larr;</span> Page №<span id="n_page_win">1</span> <span id="next_page_w"  class="page_arrow">&rarr;</span></h3>
   
     `,
+    tableWin: `
+    <table class="win_table"><tbody  id="win_table">
+    </tbody></table>`,
+    tableWinTitle: `
+    <tr>
+    <th> № </th> <th> Car </th> <th>Name</th> <th>Wins<span id="sort_win"></span> </th><th>Best time<span id="sort_time"></span></th>
+    </tr>`,
 };

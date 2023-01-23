@@ -1,4 +1,4 @@
-import { nCarsInPage, ICar } from '../../types/heap';
+import { nCarsInPage, nWinInPage, ICar, IWin } from '../../types/heap';
 
 class Base {
     base: string;
@@ -12,12 +12,52 @@ class Base {
         this.win_query = this.base + '/winners';
     }
 
+    getWinners = async (page = -1, limit = nWinInPage) => {
+        let hvost = `?_page=${page}&_limit=${limit}`;
+        if (page === -1) hvost = '';
+        console.log('getwinners', this.win_query + hvost);
+        const response = await fetch(this.win_query + hvost);
+        return {
+            items: await response.json(),
+            cpunt: response.headers.get('X-Total-Count'),
+        };
+    };
+
+    addWin = async (param: IWin) => {
+        console.log('base add', JSON.stringify(param));
+        await fetch(this.win_query, {
+            method: 'POST',
+            body: JSON.stringify(param),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
+
+    updateWin = async (param: IWin) => {
+        console.log('base update', JSON.stringify(param));
+        await fetch(this.win_query + '/' + param.id, {
+            method: 'PUT',
+            body: JSON.stringify(param),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+    };
+
     getCars = async (page: number, limit = nCarsInPage) => {
         const hvost = `?_page=${page}&_limit=${limit}`;
         const response = await fetch(this.garage_query + hvost);
         return {
             items: await response.json(),
             cpunt: response.headers.get('X-Total-Count'),
+        };
+    };
+
+    getCar = async (id: number) => {
+        const response = await fetch(this.garage_query + '/' + id);
+        return {
+            item: await response.json(),
         };
     };
 
