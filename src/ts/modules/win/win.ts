@@ -1,5 +1,5 @@
 import Base from './../base/base';
-import { templ, IWin } from '../../types/heap';
+import { templ, IWin, nWinInPage } from '../../types/heap';
 
 class Win {
     base: Base;
@@ -11,6 +11,9 @@ class Win {
     elemNumWins: HTMLElement | null = null;
     elemCurPage: HTMLElement | null = null;
     elemTableWin: HTMLElement | null = null;
+    elemNextPage: HTMLElement | null = null;
+    elemPrevPage: HTMLElement | null = null;
+    sortArr: Array<HTMLElement | null> = [];
 
     constructor(base: Base) {
         this.base = base;
@@ -21,19 +24,12 @@ class Win {
     }
 
     newWin(id: number, time: number) {
-        /*let find = -1;
-        for (let i = 0; i < this.winsAll.length; i += 1) {
-            console.log(i, this.winsAll[i], this.winsAll[i].id);
-            if (this.winsAll[i].id === id) find = id;
-        }
-        console.log('find', find, this.winsAll);*/
         const elem = this.winsAll.find((item) => item.id === id);
         if (elem === undefined)
             this.base.addWin({ id: id, wins: 1, time: time }).then(() => {
                 this.getWinAll();
             });
         else {
-            //const elem = this.winsAll[find];
             if (elem.time > time) elem.time = time;
             elem.wins += 1;
             this.base.updateWin(elem).then(() => {
@@ -44,7 +40,6 @@ class Win {
 
     async getWinInPage() {
         this.base.getWinners(this.nPage).then((result) => {
-            console.log('getWinInPage', result);
             this.winsInPage = result.items;
             if (this.elemCurPage !== null) {
                 this.elemCurPage.innerHTML = String(this.nPage);
@@ -55,11 +50,10 @@ class Win {
 
     async getWinAll() {
         this.base.getWinners().then((result) => {
-            console.log('getWinAll', result);
             this.winsAll = result.items;
             if (this.elemNumWins !== null) {
-                console.log('getWinAll -1', this.winsAll.length);
                 this.elemNumWins.innerHTML = String(this.winsAll.length);
+                this.nWins = this.winsAll.length;
             }
         });
     }
@@ -67,11 +61,23 @@ class Win {
     drawTable() {
         this.elemTableWin = document.getElementById('win_table');
         if (this.elemTableWin) this.elemTableWin.innerHTML = templ['tableWinTitle'];
+        this.sortArr[0] = document.getElementById('sort_win_up');
+        this.sortArr[1] = document.getElementById('sort_win_down');
+        this.sortArr[2] = document.getElementById('sort_time_up');
+        this.sortArr[3] = document.getElementById('sort_time_down');
+        const win = this;
+        for (let i = 0; i <= 3; i += 1) {
+            this.sortArr[i]?.addEventListener('click', function () {
+                win.sort(i);
+            });
+        }
+
         for (let i = 0; i < this.winsInPage.length; i += 1) {
+            const curN = i + 1 + (this.nPage - 1) * nWinInPage;
             const win = this.winsInPage[i];
             const tr = document.createElement('tr');
             this.base.getCar(win.id).then((result) => {
-                let tmp = `<td> ${i} </td>`;
+                let tmp = `<td> ${curN} </td>`;
                 tmp += `<td><div style="background-color: ${result.item.color}" class="car-table-win"><img src="./images/car.png"></div></td>`;
                 tmp += `<td><div>${result.item.name}</div></td>`;
                 tmp += `<td><div>${win.wins}</div></td>`;
@@ -82,7 +88,17 @@ class Win {
         }
     }
 
+    async changePage(to: boolean) {
+        const nPages = Math.ceil(this.nWins / nWinInPage);
+        console.log('cjhange', this.nPage, this.nWins, nPages);
+        if (to && this.nPage < nPages) this.nPage += 1;
+        if (!to && this.nPage > 1) this.nPage -= 1;
+        console.log('cjhange-2', this.nPage, this.nWins, nPages);
+        this.getWinInPage();
+    }
+
     show() {
+        const win = this;
         this.winWrap.innerHTML = templ['headerWin'] + templ['tableWin'];
         this.elemNumWins = document.getElementById('num_win');
         this.elemCurPage = document.getElementById('n_page_win');
@@ -95,6 +111,22 @@ class Win {
             const tmpWW = document.getElementById('win_wrap_page');
             if (tmpWW) tmpWW.style.display = 'none';
         });
+        this.elemNextPage = document.getElementById('next_page_w');
+        this.elemPrevPage = document.getElementById('prev_page_w');
+        this.elemNextPage?.addEventListener('click', function () {
+            win.changePage(true);
+        });
+        this.elemPrevPage?.addEventListener('click', function () {
+            win.changePage(false);
+        });
+    }
+
+    sort(cur: number) {
+        console.log('hi');
+        for (let i = 0; i <= 3; i += 1) {
+            if (cur === i) this.sortArr[i]?.classList.add('sel');
+            else this.sortArr[i]?.classList.remove('sel');
+        }
     }
 }
 export default Win;

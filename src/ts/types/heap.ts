@@ -23,7 +23,7 @@ interface Templ {
 }
 
 export const nCarsInPage = 7;
-export const nWinInPage = 10;
+export const nWinInPage = 2;
 export const vendors = ['Audi', 'Tesla', 'Mersedes', 'Chery', 'Volga', 'Toyota', 'BMW', 'Ford'];
 export const models = ['Fasty', 'Beauty', 'Nice', 'Black', 'Speedy', 'Mini', 'Camry', 'Wing', 'Sun'];
 export const templ: Templ = {
@@ -77,6 +77,10 @@ export const templ: Templ = {
     </tbody></table>`,
     tableWinTitle: `
     <tr>
-    <th> № </th> <th> Car </th> <th>Name</th> <th>Wins<span id="sort_win"></span> </th><th>Best time<span id="sort_time"></span></th>
+        <th> № </th> 
+        <th> Car </th> 
+        <th>Name</th> 
+        <th>Wins <button id="sort_win_up">&uarr;</button> <button id="sort_win_down">&darr;</button></th>
+        <th>Best time <button id="sort_time_up">&uarr;</button> <button id="sort_time_down">&darr;</button></th>
     </tr>`,
 };

@@ -93,6 +93,8 @@ button:hover { color: #c4b107;}
 .win_table {
     width:100%;
     border-collapse: collapse;
+    button {font-weight: bold; padding:2px}
+    .sel {background-color: #009688; color:black}
     td {
         text-align: center;
         padding: 10px;
