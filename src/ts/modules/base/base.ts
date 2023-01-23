@@ -12,8 +12,12 @@ class Base {
         this.win_query = this.base + '/winners';
     }
 
-    getWinners = async (page = -1, limit = nWinInPage) => {
+    getWinners = async (page = -1, order = -1, limit = nWinInPage) => {
         let hvost = `?_page=${page}&_limit=${limit}`;
+        if (order === 0) hvost += `&_sort=wins&_order=ASC`;
+        else if (order === 1) hvost += `&_sort=wins&_order=DESC`;
+        else if (order === 2) hvost += `&_sort=time&_order=ASC`;
+        else if (order === 3) hvost += `&_sort=time&_order=DESC`;
         if (page === -1) hvost = '';
         console.log('getwinners', this.win_query + hvost);
         const response = await fetch(this.win_query + hvost);

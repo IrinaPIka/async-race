@@ -14,6 +14,7 @@ class Win {
     elemNextPage: HTMLElement | null = null;
     elemPrevPage: HTMLElement | null = null;
     sortArr: Array<HTMLElement | null> = [];
+    sortCur = -1;
 
     constructor(base: Base) {
         this.base = base;
@@ -39,7 +40,7 @@ class Win {
     }
 
     async getWinInPage() {
-        this.base.getWinners(this.nPage).then((result) => {
+        this.base.getWinners(this.nPage, this.sortCur).then((result) => {
             this.winsInPage = result.items;
             if (this.elemCurPage !== null) {
                 this.elemCurPage.innerHTML = String(this.nPage);
@@ -67,8 +68,10 @@ class Win {
         this.sortArr[3] = document.getElementById('sort_time_down');
         const win = this;
         for (let i = 0; i <= 3; i += 1) {
+            if (this.sortCur === i) this.sortArr[i]?.classList.add('sel');
             this.sortArr[i]?.addEventListener('click', function () {
                 win.sort(i);
+                win.getWinInPage();
             });
         }
 
@@ -122,11 +125,11 @@ class Win {
     }
 
     sort(cur: number) {
-        console.log('hi');
         for (let i = 0; i <= 3; i += 1) {
             if (cur === i) this.sortArr[i]?.classList.add('sel');
             else this.sortArr[i]?.classList.remove('sel');
         }
+        this.sortCur = cur;
     }
 }
 export default Win;
