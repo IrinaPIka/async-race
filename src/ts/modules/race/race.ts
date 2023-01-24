@@ -148,8 +148,10 @@ class Race {
         but1.innerHTML = 'Delete';
         but1.id = 'remove' + n;
         but1.addEventListener('click', () => {
-            this.base.delCar(n);
-            this.getNumCar();
+            this.base.delCar(n).then(() => {
+                this.win.delWin(nN);
+                this.getNumCar();
+            });
         });
         divCommand.appendChild(but1);
 

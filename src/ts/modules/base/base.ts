@@ -38,6 +38,12 @@ class Base {
         });
     };
 
+    delWin = async (n: number) => {
+        await fetch(this.win_query + '/' + n, {
+            method: 'DELETE',
+        });
+    };
+
     updateWin = async (param: IWin) => {
         console.log('base update', JSON.stringify(param));
         await fetch(this.win_query + '/' + param.id, {

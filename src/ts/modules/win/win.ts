@@ -29,15 +29,26 @@ class Win {
         if (elem === undefined)
             this.base.addWin({ id: id, wins: 1, time: time }).then(() => {
                 this.getWinAll();
+                this.getWinInPage();
             });
         else {
             if (elem.time > time) elem.time = time;
             elem.wins += 1;
             this.base.updateWin(elem).then(() => {
                 this.getWinAll();
+                this.getWinInPage();
             });
         }
     }
+
+    delWin = async (id: number) => {
+        const elem = this.winsAll.find((item) => item.id === id);
+        if (elem !== undefined)
+            this.base.delWin(elem.id).then(() => {
+                this.getWinAll();
+                this.getWinInPage();
+            });
+    };
 
     async getWinInPage() {
         this.base.getWinners(this.nPage, this.sortCur).then((result) => {

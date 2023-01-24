@@ -23,7 +23,7 @@ interface Templ {
 }
 
 export const nCarsInPage = 7;
-export const nWinInPage = 2;
+export const nWinInPage = 5;
 export const vendors = ['Audi', 'Tesla', 'Mersedes', 'Chery', 'Volga', 'Toyota', 'BMW', 'Ford'];
 export const models = ['Fasty', 'Beauty', 'Nice', 'Black', 'Speedy', 'Mini', 'Camry', 'Wing', 'Sun'];
 export const templ: Templ = {
