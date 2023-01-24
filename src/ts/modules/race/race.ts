@@ -1,6 +1,6 @@
 import Base from './../base/base';
 import Win from './../win/win';
-import { templ, vendors, models, nCarsInPage, ICar, ICarGo } from '../../types/heap';
+import { templ, vendors, models, nCarsInPage, ICar, ICarGo, createByTag } from '../../types/heap';
 
 class Race {
     base: Base;
@@ -11,13 +11,7 @@ class Race {
     page_garage: HTMLElement | null = null;
     elemNumCars: HTMLElement | null = null;
     elemCurPage: HTMLElement | null = null;
-    elemNextPage: HTMLElement | null = null;
-    elemPrevPage: HTMLElement | null = null;
-    elemAddCar: HTMLElement | null = null;
-    elemAdd100Car: HTMLElement | null = null;
-    elemUpdateCar: HTMLElement | null = null;
     elemTableRace: HTMLElement | null = null;
-    elemRemove: Array<HTMLElement | null> = [];
     elemRace: HTMLInputElement | null = null;
     elemReset: HTMLInputElement | null = null;
     carsInPage: Array<ICar> = [];
@@ -27,94 +21,77 @@ class Race {
 
     constructor(base: Base, win: Win) {
         this.base = base;
+        const race = this;
         this.win = win;
         this.raceWrap = document.createElement('div');
         this.raceWrap.id = 'race_wrap';
         this.raceWrap.innerHTML = templ['headerRace'] + templ['tableRace'] + templ['winRace'];
         document.body.appendChild(this.raceWrap);
-    }
 
-    show() {
-        const race = this;
         this.elemNumCars = document.getElementById('num_cars');
         this.elemCurPage = document.getElementById('n_page');
-        this.elemUpdateCar = document.getElementById('update');
-        this.elemAddCar = document.getElementById('create');
-        this.elemRace = <HTMLInputElement>document.getElementById('race');
-        this.elemReset = <HTMLInputElement>document.getElementById('reset');
-        if (this.elemAddCar !== null)
-            this.elemAddCar.addEventListener('click', function () {
-                const text = <HTMLInputElement>document.getElementById('item_create');
-                const color = <HTMLInputElement>document.getElementById('color_create');
-                race.base.addCar({ name: text?.value, color: color?.value });
-                race.getNumCar();
-            });
-        if (this.elemUpdateCar !== null)
-            this.elemUpdateCar.addEventListener('click', function () {
-                const textTmp = <HTMLInputElement>document.getElementById('item_update');
-                const colorTmp = <HTMLInputElement>document.getElementById('color_update');
-                const idTmp = <HTMLInputElement>document.getElementById('id_update');
 
-                if (textTmp && colorTmp && idTmp) {
-                    race.base.updateCar({ name: textTmp.value, color: colorTmp.value, id: Number(idTmp.value) });
-                    race.getNumCar();
-                }
-            });
-        this.elemAdd100Car = document.getElementById('generate');
-        this.elemAdd100Car?.addEventListener('click', function () {
-            race.add100Car();
+        document.getElementById('create')?.addEventListener('click', function () {
+            const text = <HTMLInputElement>document.getElementById('item_create');
+            const color = <HTMLInputElement>document.getElementById('color_create');
+            race.base.addCar({ name: text?.value, color: color?.value });
+            race.drawTableCar();
         });
-        this.elemNextPage = document.getElementById('next_page');
-        this.elemPrevPage = document.getElementById('prev_page');
-        this.elemNextPage?.addEventListener('click', function () {
-            race.changePage(true);
+        document.getElementById('update')?.addEventListener('click', function () {
+            const textTmp = <HTMLInputElement>document.getElementById('item_update');
+            const colorTmp = <HTMLInputElement>document.getElementById('color_update');
+            const idTmp = <HTMLInputElement>document.getElementById('id_update');
+            if (textTmp && colorTmp && idTmp) {
+                race.base.updateCar({ name: textTmp.value, color: colorTmp.value, id: Number(idTmp.value) });
+                race.drawTableCar();
+            }
         });
-        this.elemPrevPage?.addEventListener('click', function () {
-            race.changePage(false);
-        });
+        document.getElementById('next_page')?.addEventListener('click', () => race.changePage(true));
+        document.getElementById('prev_page')?.addEventListener('click', () => race.changePage(false));
+        document.getElementById('generate')?.addEventListener('click', () => race.add100Car());
+        this.drawTableCar();
 
-        this.elemTableRace = document.getElementById('race_table');
-        this.getNumCar();
-
-        // ************   race   ************
-        if (this.elemRace !== null)
-            this.elemRace.addEventListener('click', function () {
-                race.curWin = -1;
-                race.timeStart = Date.now();
-                const cars = document.getElementsByClassName('car_img');
-                for (let i = 0; i < cars.length; i += 1) {
-                    const tmp = cars[i].id.replace('car_img', '');
-                    race.driveCar(tmp);
-                }
-                this.disabled = true;
-            });
-        // ************   reset   ************
-        if (this.elemReset !== null)
-            this.elemReset.addEventListener('click', function () {
-                const cars = document.getElementsByClassName('car_img');
-                for (let i = 0; i < cars.length; i += 1) {
-                    const nN = Number(cars[i].id.replace('car_img', ''));
-                    console.log('reset', nN, race.handle[nN]);
-                    if (race.handle[nN]) clearInterval(race.handle[nN]);
-                    const tmp = <HTMLElement>cars[i];
-                    tmp.style.marginLeft = '0px';
-                    const tmpBack = <HTMLButtonElement>document.getElementById('back' + nN);
-                    if (tmpBack) tmpBack.disabled = true;
-                    const tmpStart = <HTMLButtonElement>document.getElementById('forward' + nN);
-                    if (tmpStart) tmpStart.disabled = false;
-                }
-                if (race.elemRace) race.elemRace.disabled = false;
-            });
-        const tmpWin = document.getElementById('title_win1');
-        tmpWin?.addEventListener('click', () => {
+        document.getElementById('title_win1')?.addEventListener('click', () => {
             const tmpRW = document.getElementById('race_wrap');
             if (tmpRW) tmpRW.style.display = 'none';
             const tmpWW = document.getElementById('win_wrap_page');
             if (tmpWW) tmpWW.style.display = 'block';
         });
+        this.butRaceReset();
     }
 
-    async getNumCar() {
+    butRaceReset() {
+        const race = this;
+        this.elemRace = <HTMLInputElement>document.getElementById('race');
+        this.elemReset = <HTMLInputElement>document.getElementById('reset');
+        this.elemTableRace = document.getElementById('race_table');
+        this.elemRace?.addEventListener('click', function () {
+            race.curWin = -1;
+            race.timeStart = Date.now();
+            const cars = document.getElementsByClassName('car_img');
+            for (let i = 0; i < cars.length; i += 1) {
+                const tmp = cars[i].id.replace('car_img', '');
+                race.driveCar(tmp);
+            }
+            this.disabled = true;
+        });
+        this.elemReset?.addEventListener('click', function () {
+            const cars = document.getElementsByClassName('car_img');
+            for (let i = 0; i < cars.length; i += 1) {
+                const nN = Number(cars[i].id.replace('car_img', ''));
+                if (race.handle[nN]) clearInterval(race.handle[nN]);
+                const tmp = <HTMLElement>cars[i];
+                tmp.style.marginLeft = '0px';
+                const tmpBack = <HTMLButtonElement>document.getElementById('back' + nN);
+                if (tmpBack) tmpBack.disabled = true;
+                const tmpStart = <HTMLButtonElement>document.getElementById('forward' + nN);
+                if (tmpStart) tmpStart.disabled = false;
+            }
+            if (race.elemRace) race.elemRace.disabled = false;
+        });
+    }
+
+    async drawTableCar() {
         this.base.getCars(this.nPage).then((result) => {
             if (result.cpunt !== null && this.elemNumCars !== null) {
                 this.nCars = Number(result.cpunt);
@@ -135,93 +112,50 @@ class Race {
     drawStr(car: ICar) {
         const race = this;
         const n = String(car.id);
-        const nN = Number(n);
         const tr1 = document.createElement('tr');
-        const th1Left = document.createElement('th');
-        th1Left.className = 'left_td';
-
-        const divCommand = document.createElement('div');
-        divCommand.className = 'command';
-        divCommand.id = 'com' + n;
-
-        const but1 = document.createElement('button');
-        but1.innerHTML = 'Delete';
-        but1.id = 'remove' + n;
+        const th1Left = createByTag({ tag: 'th', class: 'left_td', parent: tr1 });
+        const divCommand = createByTag({ tag: 'div', class: 'command', id: 'com' + n, parent: th1Left });
+        const but1 = createByTag({ tag: 'button', id: 'remove' + n, inner: 'Delete', parent: divCommand });
         but1.addEventListener('click', () => {
             this.base.delCar(n).then(() => {
-                this.win.delWin(nN);
-                this.getNumCar();
+                this.win.delWin(+n);
+                this.drawTableCar();
             });
         });
-        divCommand.appendChild(but1);
-
-        const but2 = document.createElement('button');
-        but2.innerHTML = 'Select';
-        but2.id = 'select' + n;
+        const but2 = createByTag({ tag: 'button', inner: 'Select', id: 'select' + n, parent: divCommand });
         but2.addEventListener('click', () => {
             const update = <HTMLInputElement>document.getElementById('item_update');
             update.value = car.name;
             const color = <HTMLInputElement>document.getElementById('color_update');
             color.value = car.color;
             const id = <HTMLInputElement>document.getElementById('id_update');
-            id.value = String(car.id);
+            id.value = n;
         });
-        divCommand.appendChild(but2);
-        th1Left.appendChild(divCommand);
+        const td1Center = createByTag({ tag: 'td', class: 'center_td', parent: tr1 });
+        createByTag({ tag: 'div', class: 'car_name', id: 'car_name', inner: car.name, parent: td1Center });
+        createByTag({ tag: 'td', class: 'right_td', parent: tr1 });
 
-        const td1Center = document.createElement('td');
-        td1Center.className = 'center_td';
-        const div2 = document.createElement('div');
-        div2.className = 'car_name';
-        div2.id = 'car_name' + n;
-        div2.innerHTML = car.name;
-        td1Center.appendChild(div2);
-
-        const td2Right = document.createElement('td');
-        td2Right.className = 'right_td';
-        tr1.appendChild(th1Left);
-        tr1.appendChild(td1Center);
-        tr1.appendChild(td2Right);
-
-        const tr2 = document.createElement('tr');
-        tr2.className = 'dotted';
-        const th2 = document.createElement('th');
-        const div3Command = document.createElement('div');
-        const butStart = document.createElement('button');
-        butStart.innerHTML = 'Start';
-        butStart.id = 'forward' + n;
-        butStart.addEventListener('click', () => {
-            race.driveCar(n);
-        });
+        const tr2 = createByTag({ tag: 'tr', class: 'dotted' });
+        const th2 = createByTag({ tag: 'th', parent: tr2 });
+        const div3Command = createByTag({ tag: 'div', parent: th2 });
+        const butStart = <HTMLButtonElement>createByTag({ tag: 'button', inner: 'Start', id: 'forward' + n });
+        butStart.addEventListener('click', () => race.driveCar(n));
         div3Command.appendChild(butStart);
-
-        const butBack = document.createElement('button');
-        butBack.innerHTML = '&#9668;';
-        butBack.id = 'back' + n;
+        const butBack = <HTMLInputElement>createByTag({ tag: 'button', inner: '&#9668;', id: 'back' + n });
         butBack.disabled = true;
         butBack.addEventListener('click', () => {
             const car = <HTMLElement>document.getElementById('car_img' + n);
-            if (race.handle[nN]) clearInterval(race.handle[nN]);
+            if (race.handle[+n]) clearInterval(race.handle[+n]);
             if (car) car.style.marginLeft = '0px';
             butBack.disabled = true;
             butStart.disabled = false;
         });
         div3Command.appendChild(butBack);
-        th2.appendChild(div3Command);
-
-        const td2center = document.createElement('td');
-        const divCar = document.createElement('div');
+        const td2center = createByTag({ tag: 'td', parent: tr2 });
+        const divCar = createByTag({ tag: 'div', class: 'car_img', id: 'car_img' + n, parent: td2center });
         divCar.style.backgroundColor = car.color;
-        divCar.className = 'car_img';
-        divCar.id = 'car_img' + n;
         divCar.innerHTML = '<img src="./images/car.png"></div>';
-        td2center.appendChild(divCar);
-
-        const td2right = document.createElement('td');
-        td2right.innerHTML = '<img src="./images/flag.png" >';
-        tr2.appendChild(th2);
-        tr2.appendChild(td2center);
-        tr2.appendChild(td2right);
+        createByTag({ tag: 'td', inner: '<img src="./images/flag.png" >', parent: tr2 });
         return [tr1, tr2];
     }
 
@@ -281,7 +215,7 @@ class Race {
         const nPages = Math.ceil(this.nCars / nCarsInPage);
         if (to && this.nPage < nPages) this.nPage += 1;
         if (!to && this.nPage > 1) this.nPage -= 1;
-        this.getNumCar();
+        this.drawTableCar();
     }
 
     add100Car() {
@@ -295,7 +229,7 @@ class Race {
             p.push(this.base.addCar({ name: randModel, color: randColor }));
         }
         Promise.all(p).then(() => {
-            this.getNumCar();
+            this.drawTableCar();
         });
     }
 }

@@ -10,7 +10,6 @@ class App {
         this.winPage = new Win(this.base);
         this.winPage.show();
         this.racePage = new Race(this.base, this.winPage);
-        this.racePage.show();
     }
 }
 

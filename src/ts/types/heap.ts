@@ -22,6 +22,23 @@ interface Templ {
     tableWinTitle: string;
 }
 
+interface paramCreateByTag {
+    tag: string;
+    class?: string;
+    id?: string;
+    inner?: string;
+    parent?: HTMLElement;
+}
+
+export function createByTag(param: paramCreateByTag) {
+    const tmp = document.createElement(param.tag);
+    if (param.class) tmp.className = param.class;
+    if (param.id) tmp.id = param.id;
+    if (param.inner) tmp.innerHTML = param.inner;
+    if (param.parent) param.parent.appendChild(tmp);
+    return tmp;
+}
+
 export const nCarsInPage = 7;
 export const nWinInPage = 5;
 export const vendors = ['Audi', 'Tesla', 'Mersedes', 'Chery', 'Volga', 'Toyota', 'BMW', 'Ford'];
