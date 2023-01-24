@@ -248,9 +248,8 @@ class Race {
                         race.base.stopCar(n);
                         if (race.curWin === -1) {
                             race.curWin = nN;
-                            const time = Date.now() - race.timeStart;
+                            const time = (Date.now() - race.timeStart) / 1000;
                             race.showWin(nN, time);
-                            console.log('race', nN, time);
                             race.win.newWin(nN, time);
                         }
                     }
@@ -272,7 +271,7 @@ class Race {
         const win_name = document.getElementById('win_name');
         if (car_name && win_name) win_name.innerHTML = car_name.innerHTML;
         const win_time = document.getElementById('win_time');
-        if (win_time) win_time.innerHTML = String(time / 1000);
+        if (win_time) win_time.innerHTML = String(time);
         setTimeout(() => {
             if (divWin) divWin.style.display = 'none';
         }, 3000);

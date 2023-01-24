@@ -28,10 +28,12 @@ class Win {
         const elem = this.winsAll.find((item) => item.id === id);
         if (elem === undefined)
             this.base.addWin({ id: id, wins: 1, time: time }).then(() => {
+                console.log('new', time);
                 this.getWinAll();
                 this.getWinInPage();
             });
         else {
+            console.log('update', elem.time, time);
             if (elem.time > time) elem.time = time;
             elem.wins += 1;
             this.base.updateWin(elem).then(() => {
@@ -104,10 +106,8 @@ class Win {
 
     async changePage(to: boolean) {
         const nPages = Math.ceil(this.nWins / nWinInPage);
-        console.log('cjhange', this.nPage, this.nWins, nPages);
         if (to && this.nPage < nPages) this.nPage += 1;
         if (!to && this.nPage > 1) this.nPage -= 1;
-        console.log('cjhange-2', this.nPage, this.nWins, nPages);
         this.getWinInPage();
     }
 
