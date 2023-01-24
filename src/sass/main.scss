@@ -1,0 +1,111 @@
+$base-color: rgb(14, 13, 13);
+$shadow-color: #cdcccc;
+$dark-color: #9c9c9c;
+$accent-color: #f5b8a8;
+
+body {
+    background-color: $base-color;
+    padding: 0;
+    margin: 0;
+    color: beige;;
+    padding: 2% 5%;
+}
+
+button {
+    font-size: 16px;
+    font-weight: bold;
+    color: #009688;
+    padding: 3px 5px;
+    cursor: pointer;
+}
+button:hover { color: #c4b107;}
+
+.title-wrap {
+    display: flex;
+    cursor: pointer;
+    font-size: 24px;
+    div {
+        margin: 10px 20px;
+    }
+    div:hover{ color: #009688;}
+}
+
+.command {
+    margin-top:10px
+}
+.page_arrow {
+    margin:0px 10px;
+    cursor: pointer;
+}
+
+.race_table {
+    width:100%;
+    table-layout:fixed;
+    border-collapse: collapse;
+    .dotted {   border-bottom: 4px dotted green;   }
+    td {        text-align:left;    }
+
+    .left_td {width: 10%; min-width:140px;}
+    .center_td {width: 85%;}
+    .right_td {width: 5%; text-align:right}
+    .right_td img {max-width:100%}
+    
+    button {
+        background: #ffeb3b2e;
+        padding: 2px 3px;
+    }
+    button:hover { color: white;}
+    button:disabled {  
+        background-color: #4a4949;
+        color: #777;
+        padding: 0px;
+    }
+    .car_name {
+        font-size: 20px; 
+        text-transform: uppercase;
+        margin-left: 7%;
+    }
+    .car_img {
+        width: 88px;
+        height: 50px;
+        border: 0px; 
+        image {width:100%}
+    }
+}
+.win_wrap {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 20%;
+    width: 50%;
+    background-color: black;
+    opacity: 0.7;
+    text-align:center;
+    .win_text {
+        font-size: 40px;
+        font-weight: bold;
+        border: 1px dotted yellow;
+        box-shadow: 0px 1px 15px 14px green;
+        padding: 20px;
+    }
+    }
+.win_wrap_page { display:none}
+.win_table {
+    width:100%;
+    border-collapse: collapse;
+    button {font-weight: bold; padding:2px}
+    .sel {background-color: #009688; color:black}
+    td {
+        text-align: center;
+        padding: 10px;
+        border: 1px solid rgb(34, 34, 34);
+     }
+    .car-table-win {
+        height: 25px;
+        width: 60px;
+        margin-left: 40%;
+        img {
+            max-width:100%;
+        }
+    }
+}
